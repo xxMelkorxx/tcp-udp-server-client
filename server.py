@@ -1,62 +1,60 @@
 from socket import *
 
-# Запуск TCP клиента.
-def start_tcp_client(addr):
-    # Бесконечный цикл работы программы.
-    while True:
-        # Создание сокета.
-        s = socket(family=AF_INET, type=SOCK_STREAM)
-        # Устанавление тайм-аута на ответ от сервера.
-        s.settimeout(10)
-        try:
-            # Формирование сообщения серверу.
-            data = input('Напиши серверу: ').encode()
-            if not data:
-                s.close()
-                break
-            # Соединения с сервером.
-            s.connect(addr)
-            # Отправка сообщения серверу.
-            s.send(data)
-            # Получение ответа от сервера.
-            data = s.recv(1024).decode()
-            print(f"Сервер: {data}")
-        except ConnectionRefusedError:
-            print('Сервер не отвечает...')
-            continue
-        except TimeoutError:
-            print('Вышло время ожидание ответа от сервера...')
-            continue
-        finally:
-            s.close()
+def start_tcp_server(addr):
+    """
+    Запуск TCP-сервера.
+    :param addr: Адрес сервера.
+    """
+    # Создание сокета.
+    with socket(family=AF_INET, type=SOCK_STREAM) as s:
+        # Связывание адреса и порта сокета.
+        s.bind(addr)
+        # Запуск приёма TCP.
+        s.listen()
+        while True:
+            print('Ожидание соединения...')
+            try:
+                # Установление соединения с клиентом.
+                conn, addr = s.accept()
+                print(f'IP-клиента: {addr}')
+                # Получение сообщение от клиента
+                data = conn.recv(1024).decode()
+                print(f'Клиент: {data}')
+                if data == 'stop':
+                    conn.send('Сервер остановлен...'.encode())
+                    conn.close()
+                    break
+                # Отправка ответного сообщения клиенту.
+                answer = input('Ответ клиенту: ').encode()
+                conn.send(answer)
+                conn.close()
+            except ConnectionRefusedError:
+                print('Клиент не отвечает...')
 
-# Запуск UDP клиента.
-def start_udp_client(addr):
-    # Бесконечный цикл работы программы.
-    while True:
-        # Создание сокета.
-        s = socket(family=AF_INET, type=SOCK_DGRAM)
-        # Устанавление тайм-аута на ответ от сервера.
-        s.settimeout(10)
-        try:
-            # Формирование сообщения серверу.
-            data = str.encode(input('Напиши серверу: '))
-            if not data:
-                s.close()
-                break
-            # Отправка сообщения серверу.
-            s.sendto(data, addr)
-            # Получение ответа от сервера.
-            data = s.recvfrom(1024)
-            print(f"Сервер: {data[0].decode()}")
-        except ConnectionRefusedError:
-            print('Сервер не отвечает...')
-            continue
-        except TimeoutError:
-            print('Вышло время ожидание ответа от сервера...')
-            continue
-        finally:
-            s.close()
+def start_udp_server(addr):
+    """
+    Запуск UDP-сервера.
+    :param addr: Адрес сервера.
+    """
+    # Создание сокета.
+    with socket(family=AF_INET, type=SOCK_DGRAM) as s:
+        # Связывание адреса и порта сокета.
+        s.bind(addr)
+
+        while True:
+            print('Ожидание соединения...')
+            try:
+                # Установление соединения и получение сообщение от клиента.
+                data, addr = s.recvfrom(1024)
+                print(f'Адрес клиента: {addr[0]}:{addr[1]}; Cообщение: {data.decode()}')
+                if data.decode() == 'stop':
+                    s.sendto('Сервер остановлен...'.encode(), addr)
+                    break
+                # Отправка ответного сообщения клиенту.
+                answer = input('Ответ клиенту: ').encode()
+                s.sendto(answer, addr)
+            except ConnectionResetError:
+                print('Клиент не отвечает...')
 
 ###########################################################################################################################
 if __name__ == '__main__':
@@ -68,8 +66,8 @@ if __name__ == '__main__':
         socket_kind = input('Что хотите запустить (TCP - 1 или UDP - 2): ')
 
         if socket_kind == '1':
-            start_tcp_client((host, port))
+            start_tcp_server((host, port))
         elif socket_kind == '2':
-            start_udp_client((host, port))
+            start_udp_server((host, port))
         else:
             break

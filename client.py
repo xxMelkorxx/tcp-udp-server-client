@@ -1,8 +1,10 @@
 from socket import *
 
-# Запуск TCP клиента.
 def start_tcp_client(addr):
-    # Бесконечный цикл работы программы.
+    """
+    # Запуск TCP-клиента.
+    :param addr: Адрес сервера.
+    """
     while True:
         # Создание сокета.
         s = socket(family=AF_INET, type=SOCK_STREAM)
@@ -30,9 +32,11 @@ def start_tcp_client(addr):
         finally:
             s.close()
 
-# Запуск UDP клиента.
 def start_udp_client(addr):
-    # Бесконечный цикл работы программы.
+    """
+    # Запуск UDP-клиента.
+    :param addr: Адрес сервера.
+    """
     while True:
         # Создание сокета.
         s = socket(family=AF_INET, type=SOCK_DGRAM)
@@ -49,12 +53,10 @@ def start_udp_client(addr):
             # Получение ответа от сервера.
             data = s.recvfrom(1024)
             print(f"Сервер: {data[0].decode()}")
-        except ConnectionRefusedError:
-            print('Сервер не отвечает...')
-            continue
+        except ConnectionResetError:
+            print('Отсутствует соединение с сервером...')
         except TimeoutError:
             print('Вышло время ожидание ответа от сервера...')
-            continue
         finally:
             s.close()
 
