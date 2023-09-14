@@ -28,7 +28,11 @@ def start_tcp_server(addr):
                 answer = input('Ответ клиенту: ').encode()
                 conn.send(answer)
                 conn.close()
-            except ConnectionRefusedError:
+            except ConnectionRefusedError as e:
+                print(str(e))
+                print('Клиент не отвечает...')
+            except ConnectionResetError as e:
+                print(str(e))
                 print('Клиент не отвечает...')
 
 def start_udp_server(addr):
@@ -42,8 +46,8 @@ def start_udp_server(addr):
         s.bind(addr)
 
         while True:
-            print('Ожидание соединения...')
             try:
+                print('Ожидание соединения...')
                 # Установление соединения и получение сообщение от клиента.
                 data, addr = s.recvfrom(1024)
                 print(f'Адрес клиента: {addr[0]}:{addr[1]}; Cообщение: {data.decode()}')
@@ -53,13 +57,14 @@ def start_udp_server(addr):
                 # Отправка ответного сообщения клиенту.
                 answer = input('Ответ клиенту: ').encode()
                 s.sendto(answer, addr)
-            except ConnectionResetError:
+            except ConnectionResetError as e:
+                print(str(e))
                 print('Клиент не отвечает...')
 
 ###########################################################################################################################
 if __name__ == '__main__':
     # Данные сервера.
-    host = '192.168.1.114'  # '192.168.9.31'
+    host = '192.168.1.114'
     port = 777
 
     while True:

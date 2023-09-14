@@ -23,12 +23,12 @@ def start_tcp_client(addr):
             # Получение ответа от сервера.
             data = s.recv(1024).decode()
             print(f"Сервер: {data}")
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as e:
+            print(str(e))
             print('Сервер не отвечает...')
-            continue
-        except TimeoutError:
+        except TimeoutError as e:
+            print(str(e))
             print('Вышло время ожидание ответа от сервера...')
-            continue
         finally:
             s.close()
 
@@ -53,9 +53,11 @@ def start_udp_client(addr):
             # Получение ответа от сервера.
             data = s.recvfrom(1024)
             print(f"Сервер: {data[0].decode()}")
-        except ConnectionResetError:
+        except ConnectionResetError as e:
+            print(str(e))
             print('Отсутствует соединение с сервером...')
-        except TimeoutError:
+        except TimeoutError as e:
+            print(str(e))
             print('Вышло время ожидание ответа от сервера...')
         finally:
             s.close()
@@ -63,7 +65,7 @@ def start_udp_client(addr):
 ###########################################################################################################################
 if __name__ == '__main__':
     # Данные сервера.
-    host = '192.168.1.114'  # '192.168.9.31'
+    host = '192.168.1.114'
     port = 777
 
     while True:
